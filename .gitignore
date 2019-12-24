@@ -1,2 +1,11 @@
 # pycharm配置文件
 .idea
+
+# 日志文件
+logs
+
+# pyc文件缓存目录
+__pycache__
+
+# 临时文件保存目录
+tmp
