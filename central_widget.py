@@ -1,4 +1,8 @@
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QGroupBox
+
+from utils import loggers
+
+logger = loggers.get_logger("central_widget")
 
 
 class CentralWidget(QWidget):
@@ -11,7 +15,7 @@ class CentralWidget(QWidget):
         layout = QHBoxLayout()
 
         left = NavigateWidget()
-        right = DisplayWidget()
+        right = HomeWidget()
         layout.addWidget(left)
         layout.addWidget(right)
 
@@ -41,14 +45,23 @@ class NavigateWidget(QWidget):
         self.setLayout(layout)
 
 
-class DisplayWidget(QWidget):
-    """展示控件"""
+class HomeWidget(QWidget):
+    """主页展示控件"""
     def __init__(self):
         super().__init__()
         self.init_ui()
 
     def init_ui(self):
-        layout = QHBoxLayout()
-        show = QLabel("show")
-        layout.addWidget(show)
+        layout = QVBoxLayout()
+
+        create = QHBoxLayout()
+        create.addStretch(1)
+        create.addWidget(QPushButton("创建交易"))
+        recent_transaction = QGroupBox("最近交易")
+        total = QGroupBox("交易总计")
+
+        layout.addLayout(create)
+        layout.addWidget(recent_transaction)
+        layout.addWidget(total)
+
         self.setLayout(layout)

@@ -1,10 +1,9 @@
-from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMainWindow, QDesktopWidget
 
 from central_widget import CentralWidget
 from utils import loggers
 
-logger = loggers.get_logger("MainWindow")
+logger = loggers.get_logger("main_window")
 
 
 class MainWindow(QMainWindow):
@@ -27,7 +26,6 @@ class MainWindow(QMainWindow):
         使用自身和桌面屏幕的geometry，使mainWindow移动到屏幕中心
         """
         s_size = self.geometry()
-        logger.debug("s_size")
         screen = QDesktopWidget().screenGeometry()
         self.move((screen.width() - s_size.width()) / 2, (screen.height() - s_size.height()) / 2)
 
