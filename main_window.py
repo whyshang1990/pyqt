@@ -9,10 +9,10 @@ logger = loggers.get_logger("main_window")
 class MainWindow(QMainWindow):
     """应用程序主窗口"""
     def __init__(self):
+        logger.debug("主窗口初始化")
         super().__init__()
         self.init_ui()
         self.init_menubar()
-        # self.setCentralWidget(self.init_centeral_widgat())
         self.setCentralWidget(CentralWidget())
 
     def init_ui(self):
