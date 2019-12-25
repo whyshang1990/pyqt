@@ -32,5 +32,11 @@ def init_db():
     q.exec_(Constants.SQL)
 
 
+def insert_into(cost):
+    q = QSqlQuery()
+    sql = "INSERT INTO tb_transactions (cost) VALUES ({})".format(cost)
+    q.exec_(sql)
+
+
 if __name__ == '__main__':
     create_db()

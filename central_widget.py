@@ -1,9 +1,10 @@
 from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtSql import QSqlTableModel
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QGroupBox, QTableView
+from PyQt5.QtGui import QDoubleValidator
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QGroupBox, QFormLayout, \
+    QLineEdit, QCalendarWidget, QMessageBox
 
+from db import db_tools
 from utils import loggers
-from utils.constants import Constants
 
 logger = loggers.get_logger("central_widget")
 
@@ -86,18 +87,44 @@ class CreateWidget(QWidget):
         super().__init__()
         self.resize(400, 400)
         self.setWindowTitle("创建交易")
+        self.layout = QVBoxLayout()
         self.init_ui()
+        self.setLayout(self.layout)
 
     def init_ui(self):
-        layout = QVBoxLayout()
+        # 创建表单布局
+        form_layout = QFormLayout()
 
-        model = QSqlTableModel()
-        model.setTable(Constants.TRANSACTIONS_TABLE)
-        # model.setHeaderData(0, Qt.Horizontal, "name")
+        amount_edit = QLineEdit()
+        type_edit = QLineEdit()
+        remarks_edit = QLineEdit()
+        date_edit = QCalendarWidget()
 
-        table_view = QTableView()
-        table_view.setModel(model)
+        form_layout.addRow("Amount", amount_edit)
+        form_layout.addRow("Type", type_edit)
+        form_layout.addRow("Remarks", remarks_edit)
+        form_layout.addRow("date", date_edit)
 
-        layout.addWidget(table_view)
+        remarks_edit.setPlaceholderText("添加备注信息")
 
-        self.setLayout(layout)
+        # 创建按钮布局
+        btn_layout = QHBoxLayout()
+        save_btn = QPushButton("Save")
+        btn_layout.addStretch(1)
+        btn_layout.addWidget(save_btn)
+        s = amount_edit.text()
+        logger.debug("s: %s", type)
+        save_btn.clicked.connect(lambda: self.save(amount_edit.text()))
+
+        self.layout.addLayout(form_layout)
+        self.layout.addLayout(btn_layout)
+
+    @pyqtSlot(str)
+    def save(self, cost):
+        try:
+            logger.debug("cost: %f", float(cost))
+            db_tools.insert_into(cost)
+        except ValueError as e:
+            logger.debug(repr(e))
+            tips = QMessageBox()
+            tips.warning(self, '输入错误', '警告框消息正文', QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)

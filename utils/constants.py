@@ -4,5 +4,5 @@ class Constants(object):
 
     SQL = """
     CREATE TABLE IF NOT EXISTS "tb_transactions" ("id" INTEGER PRIMARY KEY AUTOINCREMENT, "cost" real, 
-    "name" text, "type" TEXT, "create_date" TEXT, "create_time" TEXT, "store" TEXT, "remarks" TEXT);
+    "name" text, "type" TEXT, "create_date" TEXT, "store" TEXT, "remarks" TEXT);
     """
