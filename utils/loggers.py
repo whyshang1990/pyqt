@@ -20,7 +20,7 @@ def get_logger(logfile):
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s [%(levelname)s]-[%(filename)s]-[%(thread)d] '
                                   '%(funcName)s():%(lineno)d - %(message)s')
-    log_root = os.path.dirname("../")
+    log_root = os.getcwd()
     if not os.path.exists(log_root + "/" + "logs"):
         os.mkdir(log_root + "/" + "logs")
 

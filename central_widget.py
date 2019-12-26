@@ -1,5 +1,4 @@
 from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtGui import QDoubleValidator
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QGroupBox, QFormLayout, \
     QLineEdit, QCalendarWidget, QMessageBox
 
@@ -83,48 +82,87 @@ class HomeWidget(QWidget):
 
 
 class CreateWidget(QWidget):
+    """
+    创建控件界面
+    """
     def __init__(self):
         super().__init__()
+        # 页面文本输入框
+        self.amount_edit = QLineEdit()
+        self.type_edit = QLineEdit()
+        self.remarks_edit = QLineEdit()
+        self.date_edit = QCalendarWidget()
+        self.save_btn = QPushButton("Save")
+        # 页面顶层布局
+        self.layout = QVBoxLayout()
+
+        # 开始初始化
+        self.init_ui()
+        self.set_ui_style()
+        self.signal_conn_slot()
+
+        self.setLayout(self.layout)
         self.resize(400, 400)
         self.setWindowTitle("创建交易")
-        self.layout = QVBoxLayout()
-        self.init_ui()
-        self.setLayout(self.layout)
 
     def init_ui(self):
-        # 创建表单布局
+        # 创建子布局1
         form_layout = QFormLayout()
+        form_layout.addRow("Amount", self.amount_edit)
+        form_layout.addRow("Type", self.type_edit)
+        form_layout.addRow("Remarks", self.remarks_edit)
+        form_layout.addRow("date", self.date_edit)
 
-        amount_edit = QLineEdit()
-        type_edit = QLineEdit()
-        remarks_edit = QLineEdit()
-        date_edit = QCalendarWidget()
-
-        form_layout.addRow("Amount", amount_edit)
-        form_layout.addRow("Type", type_edit)
-        form_layout.addRow("Remarks", remarks_edit)
-        form_layout.addRow("date", date_edit)
-
-        remarks_edit.setPlaceholderText("添加备注信息")
-
-        # 创建按钮布局
+        # 创建子布局2
         btn_layout = QHBoxLayout()
-        save_btn = QPushButton("Save")
         btn_layout.addStretch(1)
-        btn_layout.addWidget(save_btn)
-        s = amount_edit.text()
-        logger.debug("s: %s", type)
-        save_btn.clicked.connect(lambda: self.save(amount_edit.text()))
+        btn_layout.addWidget(self.save_btn)
 
         self.layout.addLayout(form_layout)
         self.layout.addLayout(btn_layout)
 
-    @pyqtSlot(str)
-    def save(self, cost):
+    def set_ui_style(self):
+        """
+        设置CreateWidget页面样式
+        """
+        # logger.debug("设置CreateWidget页面样式")
+        self.remarks_edit.setPlaceholderText("添加备注信息")
+        self.save_btn.setEnabled(False)
+
+    def signal_conn_slot(self):
+        """
+        连接信号与槽
+        """
+        # logger.debug("CreateWidget：连接信号与槽")
+        # save按钮
+        amount_edit_text = self.amount_edit.text()
+        logger.debug("amount_edit_text: %s", amount_edit_text)
+        self.save_btn.clicked.connect(lambda: self.save())
+        # save按钮是否激活
+        self.amount_edit.textChanged.connect(self.check_save_disable)
+        self.type_edit.textChanged.connect(self.check_save_disable)
+
+    @pyqtSlot()
+    def save(self):
+        """
+        save 按钮槽函数
+        """
         try:
-            logger.debug("cost: %f", float(cost))
-            db_tools.insert_into(cost)
+            params_dict = {
+                "cost": self.amount_edit.text(),
+                "trans_type": self.type_edit.text()
+            }
+            db_tools.insert_into("tb_transactions", params_dict)
         except ValueError as e:
             logger.debug(repr(e))
             tips = QMessageBox()
             tips.warning(self, '输入错误', '警告框消息正文', QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+
+    @pyqtSlot()
+    def check_save_disable(self):
+        """save按钮是否激活槽函数"""
+        logger.debug("amount_changed: %s", self.amount_edit.text())
+        if self.type_edit.text() and self.amount_edit.text():
+            self.save_btn.setEnabled(True)
+        else:
+            self.save_btn.setEnabled(False)

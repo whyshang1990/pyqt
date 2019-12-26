@@ -32,10 +32,23 @@ def init_db():
     q.exec_(Constants.SQL)
 
 
-def insert_into(cost):
-    q = QSqlQuery()
-    sql = "INSERT INTO tb_transactions (cost) VALUES ({})".format(cost)
-    q.exec_(sql)
+def insert_into(tb_name, params_dict):
+    """
+    通用的函数，向数据库插入数据
+    :param tb_name: 插入表名称
+    :param params_dict: 插入数据字典，键为数据库列名，值为插入数据
+    :return:
+    """
+    param_names = ",".join(params_dict.keys())
+    param_values = ",".join(params_dict.values())
+    logger.debug("param_names: %s", param_names)
+    logger.debug("param_values: %s", param_values)
+    try:
+        q = QSqlQuery()
+        sql = "INSERT INTO {} ({}) VALUES ({})".format(tb_name, param_names, param_values)
+        q.exec_(sql)
+    except Exception as e:
+        logger.error("插入数据异常:%s", e)
 
 
 if __name__ == '__main__':
