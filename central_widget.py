@@ -1,6 +1,7 @@
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSlot, Qt, pyqtSignal
+from PyQt5.QtSql import QSqlQueryModel
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QGroupBox, QFormLayout, \
-    QLineEdit, QCalendarWidget, QMessageBox
+    QLineEdit, QCalendarWidget, QMessageBox, QTableView
 
 from db import db_tools
 from utils import loggers
@@ -56,35 +57,37 @@ class HomeWidget(QWidget):
         logger.debug("主窗口主页控件初始化")
         super().__init__()
         self.create_btn = QPushButton("创建交易")
+
+        self.cw_widget = CreateWidget()
+        self.rt_widget = RecentTrans("最近交易")
+        self.tt_widget = QGroupBox("交易总计")
+        self.layout = QVBoxLayout()
+
         self.init_ui()
-        self.cw = CreateWidget()
-        self.create_btn.clicked.connect(self.cw.show)
-
-    def init_ui(self):
-        layout = QVBoxLayout()
-
-        create = QHBoxLayout()
-        create.addStretch(1)
-        create.addWidget(self.create_btn)
-        recent_transaction = QGroupBox("最近交易")
-        total = QGroupBox("交易总计")
-
-        layout.addLayout(create)
-        layout.addWidget(recent_transaction)
-        layout.addWidget(total)
-
-        self.setLayout(layout)
+        self.create_btn.clicked.connect(self.cw_widget.show)
+        self.cw_widget.refresh_tb_signal.connect(self.rt_widget.init_query_model)
+        # self.cw_widget.refresh_tb_signal.connect(self.rt_widget.refresh_table)
 
     @pyqtSlot()
-    def open_created_widget(self):
-        self.cw.show()
-        logger.debug("test")
+    def init_ui(self):
+        create_layout = QHBoxLayout()
+        create_layout.addStretch(1)
+        create_layout.addWidget(self.create_btn)
+
+        self.layout.addLayout(create_layout)
+        self.layout.addWidget(self.rt_widget)
+        self.layout.addWidget(self.tt_widget)
+
+        self.setLayout(self.layout)
 
 
 class CreateWidget(QWidget):
     """
     创建控件界面
     """
+    # 初始化信号
+    refresh_tb_signal = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         # 页面文本输入框
@@ -144,15 +147,15 @@ class CreateWidget(QWidget):
 
     @pyqtSlot()
     def save(self):
-        """
-        save 按钮槽函数
-        """
+        """save按钮槽函数"""
         try:
             params_dict = {
                 "cost": self.amount_edit.text(),
                 "trans_type": self.type_edit.text()
             }
             db_tools.insert_into("tb_transactions", params_dict)
+            self.refresh_tb_signal.emit()
+            self.close()
         except ValueError as e:
             logger.debug(repr(e))
             tips = QMessageBox()
@@ -166,3 +169,31 @@ class CreateWidget(QWidget):
             self.save_btn.setEnabled(True)
         else:
             self.save_btn.setEnabled(False)
+
+
+class RecentTrans(QGroupBox):
+    """
+    最近交易控件
+    """
+    def __init__(self, name):
+        super().__init__(name)
+        self.layout = QHBoxLayout()
+        self.table_view = QTableView()
+        self.query_model = QSqlQueryModel(parent=self)
+
+        self.init_query_model()
+        self.init_ui()
+        self.setMaximumSize(600, 277)
+
+    def init_ui(self):
+        self.table_view.setModel(self.query_model)
+        self.layout.addWidget(self.table_view)
+        self.setLayout(self.layout)
+
+    @pyqtSlot()
+    def init_query_model(self):
+        """表格刷新"""
+        logger.debug("表格刷新")
+        self.query_model.setQuery("select cost,trans_type from tb_transactions LIMIT 7")
+        self.query_model.setHeaderData(0, Qt.Horizontal, '金额')
+        self.query_model.setHeaderData(1, Qt.Horizontal, '分类')
