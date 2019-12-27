@@ -1,15 +1,17 @@
+# -*- coding: UTF-8 -*-
+"""主窗口类"""
 from PyQt5.QtWidgets import QMainWindow, QDesktopWidget
 
 from central_widget import CentralWidget
 from utils import loggers
 
-logger = loggers.get_logger("main_window")
+LOGGER = loggers.get_logger("main_window")
 
 
 class MainWindow(QMainWindow):
     """应用程序主窗口"""
     def __init__(self):
-        logger.debug("主窗口初始化")
+        LOGGER.debug("主窗口初始化")
         super().__init__()
         self.init_ui()
         self.init_menubar()
@@ -30,6 +32,7 @@ class MainWindow(QMainWindow):
         self.move((screen.width() - s_size.width()) / 2, (screen.height() - s_size.height()) / 2)
 
     def init_menubar(self):
+        """菜单栏初始化"""
         menu_bar = self.menuBar()
         file_menu = menu_bar.addMenu("&File")
         file_menu.addAction("New File")

@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import os
 import sys
 
@@ -7,7 +8,7 @@ from db import db_tools
 from main_window import MainWindow
 from utils import loggers
 
-logger = loggers.get_logger("app")
+LOGGER = loggers.get_logger("app")
 
 
 def main():

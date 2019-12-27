@@ -1,21 +1,20 @@
 # -*- coding: UTF-8 -*-
+"""中心窗口模块"""
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt
-from PyQt5.QtGui import QStandardItem
-from PyQt5.QtSql import QSqlQueryModel
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QGroupBox, QFormLayout, \
-    QLineEdit, QCalendarWidget, QMessageBox, QTableView, QRadioButton
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QGroupBox, \
+    QFormLayout, QLineEdit, QCalendarWidget, QMessageBox, QTableView, QRadioButton
 
 from db import db_tools
 from models.custom_models import MyTableModel
 from utils import loggers
 
-logger = loggers.get_logger("central_widget")
+LOGGER = loggers.get_logger("central_widget")
 
 
 class CentralWidget(QWidget):
     """主窗口中心控件"""
     def __init__(self):
-        logger.debug("主窗口中心控件初始化")
+        LOGGER.debug("主窗口中心控件初始化")
         super().__init__()
         self.init_ui()
 
@@ -37,7 +36,7 @@ class CentralWidget(QWidget):
 class NavigateWidget(QWidget):
     """导航控件"""
     def __init__(self):
-        logger.debug("主窗口导航控件初始化")
+        LOGGER.debug("主窗口导航控件初始化")
         super().__init__()
         self.init_ui()
 
@@ -57,7 +56,7 @@ class NavigateWidget(QWidget):
 class HomeWidget(QWidget):
     """主页展示控件"""
     def __init__(self):
-        logger.debug("主窗口主页控件初始化")
+        LOGGER.debug("主窗口主页控件初始化")
         super().__init__()
         self.create_btn = QPushButton("创建交易")
 
@@ -147,7 +146,7 @@ class CreateWidget(QWidget):
         """
         # logger.debug("CreateWidget：连接信号与槽")
         # save按钮
-        self.save_btn.clicked.connect(lambda: self.save())
+        self.save_btn.clicked.connect(self.save)
         # save按钮是否激活
         self.amount_edit.textChanged.connect(self.check_save_disable)
         self.category_edit.textChanged.connect(self.check_save_disable)
@@ -166,12 +165,12 @@ class CreateWidget(QWidget):
             db_tools.insert_into("tb_transactions", params_dict)
             self.refresh_tb_signal.emit()
             self.close()
-        except ValueError as e:
-            logger.debug(repr(e))
+        except ValueError as exp:
+            LOGGER.debug(repr(exp))
             tips = QMessageBox()
             tips.warning(self, '输入错误', '警告框消息正文', QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
-        except Exception as e:
-            logger.debug(repr(e))
+        except Exception as exp:
+            LOGGER.debug(repr(exp))
 
     @pyqtSlot()
     def check_save_disable(self):
