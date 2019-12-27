@@ -1,8 +1,7 @@
-
+# -*- coding: UTF-8 -*-
 class Constants(object):
-    TRANSACTIONS_TABLE = "tb_transactions"
+    # app目录
+    BASE_DIR = "BASE_DIR"
 
-    SQL = """
-    CREATE TABLE IF NOT EXISTS "tb_transactions" ("id" INTEGER PRIMARY KEY AUTOINCREMENT, "cost" real, 
-    "name" text, "trans_type" TEXT, "create_date" TEXT, "store" TEXT, "remarks" TEXT);
-    """
+    # 表名称
+    TRANSACTIONS_TABLE = "tb_transactions"

@@ -1,9 +1,10 @@
-from PyQt5.QtCore import pyqtSlot, Qt, pyqtSignal
-from PyQt5.QtSql import QSqlQueryModel
+# -*- coding: UTF-8 -*-
+from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QGroupBox, QFormLayout, \
     QLineEdit, QCalendarWidget, QMessageBox, QTableView
 
 from db import db_tools
+from models.re_models import MSqlQueryModel
 from utils import loggers
 
 logger = loggers.get_logger("central_widget")
@@ -93,8 +94,9 @@ class CreateWidget(QWidget):
         # 页面文本输入框
         self.amount_edit = QLineEdit()
         self.type_edit = QLineEdit()
-        self.remarks_edit = QLineEdit()
+        self.category_edit = QLineEdit()
         self.date_edit = QCalendarWidget()
+        self.remarks_edit = QLineEdit()
         self.save_btn = QPushButton("Save")
         # 页面顶层布局
         self.layout = QVBoxLayout()
@@ -112,9 +114,10 @@ class CreateWidget(QWidget):
         # 创建子布局1
         form_layout = QFormLayout()
         form_layout.addRow("Amount", self.amount_edit)
-        form_layout.addRow("Type", self.type_edit)
-        form_layout.addRow("Remarks", self.remarks_edit)
+        form_layout.addRow("Type", self.category_edit)
+        form_layout.addRow("Category", self.type_edit)
         form_layout.addRow("date", self.date_edit)
+        form_layout.addRow("Remarks", self.remarks_edit)
 
         # 创建子布局2
         btn_layout = QHBoxLayout()
@@ -138,8 +141,6 @@ class CreateWidget(QWidget):
         """
         # logger.debug("CreateWidget：连接信号与槽")
         # save按钮
-        amount_edit_text = self.amount_edit.text()
-        logger.debug("amount_edit_text: %s", amount_edit_text)
         self.save_btn.clicked.connect(lambda: self.save())
         # save按钮是否激活
         self.amount_edit.textChanged.connect(self.check_save_disable)
@@ -149,9 +150,12 @@ class CreateWidget(QWidget):
     def save(self):
         """save按钮槽函数"""
         try:
+            date = self.date_edit.selectedDate().toString(Qt.ISODate)
             params_dict = {
                 "cost": self.amount_edit.text(),
-                "trans_type": self.type_edit.text()
+                "trans_type": self.type_edit.text(),
+                "category": self.category_edit.text(),
+                "create_date": date
             }
             db_tools.insert_into("tb_transactions", params_dict)
             self.refresh_tb_signal.emit()
@@ -160,11 +164,12 @@ class CreateWidget(QWidget):
             logger.debug(repr(e))
             tips = QMessageBox()
             tips.warning(self, '输入错误', '警告框消息正文', QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+        except Exception as e:
+            logger.debug(repr(e))
 
     @pyqtSlot()
     def check_save_disable(self):
         """save按钮是否激活槽函数"""
-        logger.debug("amount_changed: %s", self.amount_edit.text())
         if self.type_edit.text() and self.amount_edit.text():
             self.save_btn.setEnabled(True)
         else:
@@ -179,13 +184,14 @@ class RecentTrans(QGroupBox):
         super().__init__(name)
         self.layout = QHBoxLayout()
         self.table_view = QTableView()
-        self.query_model = QSqlQueryModel(parent=self)
+        self.query_model = MSqlQueryModel(parent=self)
 
         self.init_query_model()
         self.init_ui()
         self.setMaximumSize(600, 277)
 
     def init_ui(self):
+        self.table_view.verticalHeader().hide()
         self.table_view.setModel(self.query_model)
         self.layout.addWidget(self.table_view)
         self.setLayout(self.layout)
@@ -194,6 +200,8 @@ class RecentTrans(QGroupBox):
     def init_query_model(self):
         """表格刷新"""
         logger.debug("表格刷新")
-        self.query_model.setQuery("select cost,trans_type from tb_transactions LIMIT 7")
+        self.query_model.setQuery("select cost,trans_type,category,create_date from tb_transactions LIMIT 7")
         self.query_model.setHeaderData(0, Qt.Horizontal, '金额')
+        self.query_model.setHeaderData(1, Qt.Horizontal, '交易类型')
         self.query_model.setHeaderData(1, Qt.Horizontal, '分类')
+        self.query_model.setHeaderData(2, Qt.Horizontal, '创建日期')

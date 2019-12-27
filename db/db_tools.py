@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import os
 
 import yaml
@@ -14,7 +15,7 @@ def create_db():
     创建数据库
     """
     # 读取配置文件
-    logger.debug(os.environ["BASE_DIR"])
+    logger.debug(os.environ[Constants.BASE_DIR])
     with open(os.environ["BASE_DIR"] + "/conf/settings.yml", "r", encoding="utf-8") as f:
         c = yaml.full_load(f.read())
     database_conf = c.get("database")
@@ -28,8 +29,11 @@ def create_db():
 
 def init_db():
     q = QSqlQuery()
-    # 创建表
-    q.exec_(Constants.SQL)
+    logger.debug(os.environ[Constants.BASE_DIR])
+    # 读取init_db.sql，并执行其中的建表语句
+    with open(os.environ[Constants.BASE_DIR] + "/db/init_db.sql", "r", encoding="utf-8") as f:
+        for sql in f.read().split(";")[:-1]:
+            q.exec_(sql)
 
 
 def insert_into(tb_name, params_dict):
@@ -40,7 +44,8 @@ def insert_into(tb_name, params_dict):
     :return:
     """
     param_names = ",".join(params_dict.keys())
-    param_values = ",".join(params_dict.values())
+    values_format = ["'" + v + "'" for v in params_dict.values()]
+    param_values = ",".join(values_format)
     logger.debug("param_names: %s", param_names)
     logger.debug("param_values: %s", param_values)
     try:
