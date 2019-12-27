@@ -44,14 +44,21 @@ def insert_into(tb_name, params_dict):
     :return:
     """
     param_names = ",".join(params_dict.keys())
-    values_format = ["'" + v + "'" for v in params_dict.values()]
+    values_format = []
+    for v in params_dict.values():
+        if isinstance(v, str):
+            values_format.append("'" + v + "'")
+        else:
+            values_format.append(str(v))
     param_values = ",".join(values_format)
-    logger.debug("param_names: %s", param_names)
-    logger.debug("param_values: %s", param_values)
+    # logger.debug("param_names: %s", param_names)
+    # logger.debug("param_values: %s", param_values)
     try:
         q = QSqlQuery()
         sql = "INSERT INTO {} ({}) VALUES ({})".format(tb_name, param_names, param_values)
-        q.exec_(sql)
+        r = q.exec_(sql)
+        if not r:
+            logger.debug("数据库插入错误")
     except Exception as e:
         logger.error("插入数据异常:%s", e)
 

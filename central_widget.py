@@ -1,10 +1,12 @@
 # -*- coding: UTF-8 -*-
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt
+from PyQt5.QtGui import QStandardItem
+from PyQt5.QtSql import QSqlQueryModel
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QGroupBox, QFormLayout, \
-    QLineEdit, QCalendarWidget, QMessageBox, QTableView
+    QLineEdit, QCalendarWidget, QMessageBox, QTableView, QRadioButton
 
 from db import db_tools
-from models.re_models import MSqlQueryModel
+from models.custom_models import MyTableModel
 from utils import loggers
 
 logger = loggers.get_logger("central_widget")
@@ -66,8 +68,7 @@ class HomeWidget(QWidget):
 
         self.init_ui()
         self.create_btn.clicked.connect(self.cw_widget.show)
-        self.cw_widget.refresh_tb_signal.connect(self.rt_widget.init_query_model)
-        # self.cw_widget.refresh_tb_signal.connect(self.rt_widget.refresh_table)
+        self.cw_widget.refresh_tb_signal.connect(self.rt_widget.model.refresh_model)
 
     @pyqtSlot()
     def init_ui(self):
@@ -93,8 +94,9 @@ class CreateWidget(QWidget):
         super().__init__()
         # 页面文本输入框
         self.amount_edit = QLineEdit()
-        self.type_edit = QLineEdit()
         self.category_edit = QLineEdit()
+        self.income_r_btn = QRadioButton("收入", self)
+        self.expense_r_btn = QRadioButton("支出", self)
         self.date_edit = QCalendarWidget()
         self.remarks_edit = QLineEdit()
         self.save_btn = QPushButton("Save")
@@ -113,9 +115,13 @@ class CreateWidget(QWidget):
     def init_ui(self):
         # 创建子布局1
         form_layout = QFormLayout()
+        r_btn_layout = QHBoxLayout()
+        self.income_r_btn.setChecked(True)
+        r_btn_layout.addWidget(self.income_r_btn)
+        r_btn_layout.addWidget(self.expense_r_btn)
         form_layout.addRow("Amount", self.amount_edit)
-        form_layout.addRow("Type", self.category_edit)
-        form_layout.addRow("Category", self.type_edit)
+        form_layout.addRow("Category", self.category_edit)
+        form_layout.addRow("Type", r_btn_layout)
         form_layout.addRow("date", self.date_edit)
         form_layout.addRow("Remarks", self.remarks_edit)
 
@@ -144,7 +150,7 @@ class CreateWidget(QWidget):
         self.save_btn.clicked.connect(lambda: self.save())
         # save按钮是否激活
         self.amount_edit.textChanged.connect(self.check_save_disable)
-        self.type_edit.textChanged.connect(self.check_save_disable)
+        self.category_edit.textChanged.connect(self.check_save_disable)
 
     @pyqtSlot()
     def save(self):
@@ -153,7 +159,7 @@ class CreateWidget(QWidget):
             date = self.date_edit.selectedDate().toString(Qt.ISODate)
             params_dict = {
                 "cost": self.amount_edit.text(),
-                "trans_type": self.type_edit.text(),
+                "trans_type": self.check_radio_btn(),
                 "category": self.category_edit.text(),
                 "create_date": date
             }
@@ -170,10 +176,17 @@ class CreateWidget(QWidget):
     @pyqtSlot()
     def check_save_disable(self):
         """save按钮是否激活槽函数"""
-        if self.type_edit.text() and self.amount_edit.text():
+        if self.category_edit.text() and self.amount_edit.text():
             self.save_btn.setEnabled(True)
         else:
             self.save_btn.setEnabled(False)
+
+    def check_radio_btn(self):
+        """设定单选按钮返回值"""
+        if self.income_r_btn.isChecked():
+            return 1
+        else:
+            return -1
 
 
 class RecentTrans(QGroupBox):
@@ -184,24 +197,13 @@ class RecentTrans(QGroupBox):
         super().__init__(name)
         self.layout = QHBoxLayout()
         self.table_view = QTableView()
-        self.query_model = MSqlQueryModel(parent=self)
+        self.model = MyTableModel(parent=self)
 
-        self.init_query_model()
         self.init_ui()
         self.setMaximumSize(600, 277)
 
     def init_ui(self):
         self.table_view.verticalHeader().hide()
-        self.table_view.setModel(self.query_model)
+        self.table_view.setModel(self.model)
         self.layout.addWidget(self.table_view)
         self.setLayout(self.layout)
-
-    @pyqtSlot()
-    def init_query_model(self):
-        """表格刷新"""
-        logger.debug("表格刷新")
-        self.query_model.setQuery("select cost,trans_type,category,create_date from tb_transactions LIMIT 7")
-        self.query_model.setHeaderData(0, Qt.Horizontal, '金额')
-        self.query_model.setHeaderData(1, Qt.Horizontal, '交易类型')
-        self.query_model.setHeaderData(1, Qt.Horizontal, '分类')
-        self.query_model.setHeaderData(2, Qt.Horizontal, '创建日期')
