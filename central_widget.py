@@ -202,6 +202,11 @@ class RecentTrans(QGroupBox):
         self.setMaximumSize(600, 277)
 
     def init_ui(self):
+        self.model.setHeaderData(0, Qt.Horizontal, '金额')
+        self.model.setHeaderData(1, Qt.Horizontal, '交易类型')
+        self.model.setHeaderData(2, Qt.Horizontal, '分类')
+        self.model.setHeaderData(3, Qt.Horizontal, '创建日期')
+
         self.table_view.verticalHeader().hide()
         self.table_view.setModel(self.model)
         self.layout.addWidget(self.table_view)

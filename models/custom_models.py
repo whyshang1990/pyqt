@@ -5,7 +5,7 @@ from PyQt5.QtSql import QSqlQueryModel
 
 from utils import loggers
 
-logger = loggers.get_logger("re_models")
+LOGGER = loggers.get_logger("re_models")
 
 
 class MyTableModel(QStandardItemModel):
@@ -14,13 +14,12 @@ class MyTableModel(QStandardItemModel):
     """
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setHeaderData(0, Qt.Horizontal, '金额')
         self.init_model()
 
     def init_model(self):
-        self.setHeaderData(0, Qt.Horizontal, '金额')
-        self.setHeaderData(1, Qt.Horizontal, '交易类型')
-        self.setHeaderData(2, Qt.Horizontal, '分类')
-        self.setHeaderData(3, Qt.Horizontal, '创建日期')
+        h = self.headerData(0, Qt.Horizontal)
+        LOGGER.debug(h)
         self.refresh_model()
 
     def data(self, index, role=None):
@@ -39,8 +38,8 @@ class MyTableModel(QStandardItemModel):
         row_count, column_count = query_model.rowCount(), query_model.columnCount()
         if row_count == 0:
             return
-        logger.debug("表格刷新")
-        logger.debug("row: %s, column: %s", row_count, column_count)
+        LOGGER.debug("表格刷新")
+        LOGGER.debug("row: %s, column: %s", row_count, column_count)
         for row in range(row_count):
             for column in range(column_count):
                 if column == 1:
