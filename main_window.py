@@ -19,9 +19,12 @@ class MainWindow(QMainWindow):
 
     def init_ui(self):
         self.setWindowTitle("记账日志")
-        self.setGeometry(100, 100, 800, 600)
+        screen = QDesktopWidget().screenGeometry()
+        LOGGER.debug("桌面分辨率: width[%s]-height[%s]", screen.width(), screen.height())
+        # self.setGeometry(100, 100, 800, 600)
+        self.setGeometry(0, 0, 1366, 768)
         self.setMinimumWidth(300)
-        self.center()
+        # self.center()
 
     def center(self):
         """

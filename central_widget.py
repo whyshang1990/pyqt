@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QGro
 from db import db_tools
 from models.custom_models import MyTableModel
 from utils import loggers
+from widgets.home_page.total_trans import TotalTrans
 
 LOGGER = loggers.get_logger("central_widget")
 
@@ -63,7 +64,7 @@ class HomeWidget(QWidget):
 
         self.cw_widget = CreateWidget()
         self.rt_widget = RecentTrans("最近交易")
-        self.tt_widget = QGroupBox("交易总计")
+        self.tt_widget = TotalTrans("交易总计")
         self.layout = QVBoxLayout()
 
         self.init_ui()
@@ -207,7 +208,7 @@ class RecentTrans(QGroupBox):
         self.model = MyTableModel(parent=self)
 
         self.init_ui()
-        self.setMaximumSize(600, 277)
+        self.setMaximumHeight(277)
 
     def init_ui(self):
         self.model.setHeaderData(0, Qt.Horizontal, '金额')
