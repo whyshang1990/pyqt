@@ -3,10 +3,10 @@
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt
 from PyQt5.QtSql import QSqlQueryModel
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QGroupBox, \
-    QFormLayout, QLineEdit, QCalendarWidget, QMessageBox, QTableView, QRadioButton, QComboBox
+    QFormLayout, QLineEdit, QCalendarWidget, QMessageBox, QTableView, QRadioButton, QComboBox, QLabel
 
 from db import db_tools
-from models.custom_models import MyTableModel
+from models.custom_models import RecentTransTableModel
 from utils import loggers
 from widgets.home_page.total_trans import TotalTrans
 
@@ -64,7 +64,8 @@ class HomeWidget(QWidget):
 
         self.cw_widget = CreateWidget()
         self.rt_widget = RecentTrans("最近交易")
-        self.tt_widget = TotalTrans("交易总计")
+        self.tt_widget_title = QLabel("交易总计")
+        self.tt_widget = TotalTrans()
         self.layout = QVBoxLayout()
 
         self.init_ui()
@@ -80,6 +81,7 @@ class HomeWidget(QWidget):
 
         self.layout.addLayout(create_layout)
         self.layout.addWidget(self.rt_widget)
+        self.layout.addWidget(self.tt_widget_title)
         self.layout.addWidget(self.tt_widget)
 
         self.setLayout(self.layout)
@@ -206,7 +208,7 @@ class RecentTrans(QGroupBox):
         super().__init__(name)
         self.layout = QHBoxLayout()
         self.table_view = QTableView()
-        self.model = MyTableModel(parent=self)
+        self.model = RecentTransTableModel(parent=self)
 
         self.init_ui()
         self.setMaximumHeight(277)

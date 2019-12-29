@@ -2,19 +2,18 @@
 """交易总计控件"""
 from PyQt5.QtCore import QDate, Qt
 from PyQt5.QtSql import QSqlQuery
-from PyQt5.QtWidgets import QGridLayout, QGroupBox
+from PyQt5.QtWidgets import QLabel, QHBoxLayout, QVBoxLayout, QListWidget
 
 from utils import loggers
 from utils.constants import Constants
-from widgets.general_widgets import BaseWidget
 
 LOGGER = loggers.get_logger("total_trans")
 
 
-class TotalTrans(QGroupBox):
+class TotalTrans(QListWidget):
     """交易总计控件"""
-    def __init__(self, name):
-        super().__init__(name)
+    def __init__(self):
+        super().__init__()
         # 根据今天日期获取本周，本月，本年的日期范围
         self.today = QDate().currentDate()
         self.first_day_of_week = QDate(self.today.addDays(1 - self.today.dayOfWeek()))
@@ -33,30 +32,22 @@ class TotalTrans(QGroupBox):
         month_expand = self.__get_total("month", Constants.TRANS_TYPE["expand"])
         year_income = self.__get_total("year", Constants.TRANS_TYPE["income"])
         year_expand = self.__get_total("year", Constants.TRANS_TYPE["expand"])
-        self.today_widget = BaseWidget("今日", "总收入：{:.2f}".format(today_income),
-                                       self.today.toString(date_format), "总支出： {:.2f}".format(today_expend))
-        self.week_widget = BaseWidget("本周", "总收入：{:.2f}".format(week_income),
-                                      self.first_day_of_week.toString(date_format) + " - " +
-                                      self.last_day_of_week.toString(date_format),
-                                      "总支出： {:.2f}".format(week_expand))
-        self.month_widget = BaseWidget("本月", "总收入：{:.2f}".format(month_income),
-                                       self.first_day_of_month.toString(date_format) + " - " +
-                                       self.last_day_of_month.toString(date_format),
-                                       "总支出： {:.2f}".format(month_expand))
-        self.year_widget = BaseWidget("本年", "总收入：{:.2f}".format(year_income),
-                                      self.first_day_of_year.toString(date_format) + " - " +
-                                      self.last_day_of_year.toString(date_format),
-                                      "总支出： {:.2f}".format(year_expand))
+        self.today_widget = self._RowWidget("本日", self.today.toString(date_format), today_income, today_expend)
+        self.week_widget = self._RowWidget("本周", self.first_day_of_week.toString(date_format) + " - " +
+                                           self.last_day_of_week.toString(date_format), week_income, week_expand)
+        self.month_widget = self._RowWidget("本月", self.first_day_of_month.toString(date_format) + " - " +
+                                            self.last_day_of_month.toString(date_format), month_income, month_expand)
+        self.year_widget = self._RowWidget("本年", self.first_day_of_year.toString(date_format) + " - " +
+                                           self.last_day_of_year.toString(date_format), year_income, year_expand)
 
-        self.layout = QGridLayout()
+        self.layout = QVBoxLayout()
         self.init_ui()
 
     def init_ui(self):
-        self.layout.setSpacing(1)
-        self.layout.addWidget(self.today_widget, 1, 0)
-        self.layout.addWidget(self.week_widget, 1, 1)
-        self.layout.addWidget(self.month_widget, 2, 0)
-        self.layout.addWidget(self.year_widget, 2, 1)
+        self.layout.addWidget(self.today_widget)
+        self.layout.addWidget(self.week_widget)
+        self.layout.addWidget(self.month_widget)
+        self.layout.addWidget(self.year_widget)
 
         self.setLayout(self.layout)
 
@@ -81,3 +72,41 @@ class TotalTrans(QGroupBox):
                 return query.value(rec)
             else:
                 return 0
+
+    class _RowWidget(QListWidget):
+        def __init__(self, summary, details, income, expend):
+            super().__init__()
+            self.layout = QHBoxLayout()
+            self.summary = QLabel(summary)
+            self.details = QLabel(details)
+            self.income = QLabel("{:.2f}".format(income))
+            self.expend = QLabel("{:.2f}".format(expend))
+            # self.model = QAbstractListModel()
+            # self.setModel(self.model)
+
+            self.init_layout()
+
+        def init_layout(self):
+            self.layout.addWidget(self.summary)
+            self.layout.addWidget(self.details)
+            self.layout.addSpacing(1)
+            self.layout.addWidget(QLabel("总收入："))
+            self.layout.addWidget(self.income)
+            self.layout.addWidget(QLabel("总支出："))
+            self.layout.addWidget(self.expend)
+
+            self.summary.setMaximumWidth(30)
+            self.details.setMinimumWidth(500)
+            self.income.setMinimumWidth(400)
+            self.expend.setMinimumWidth(120)
+
+            self.setLayout(self.layout)
+
+    # class _Model(QAbstractListModel):
+    #     def __init__(self):
+    #         super().__init__()
+    #
+    #     def data(self, index, role=None):
+    #         pass
+    #
+    #     def rowCount(self, parent=None, *args, **kwargs):

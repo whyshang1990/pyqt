@@ -8,13 +8,12 @@ from utils import loggers
 LOGGER = loggers.get_logger("re_models")
 
 
-class MyTableModel(QStandardItemModel):
+class RecentTransTableModel(QStandardItemModel):
     """
     继承QStandardItemModel，初始化为表格
     """
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setHeaderData(0, Qt.Horizontal, '金额')
         self.init_model()
 
     def init_model(self):

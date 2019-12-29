@@ -18,7 +18,9 @@ class BaseWidget(QWidget):
     def init_ui(self):
         self.layout.addWidget(self.summary, 1, 0)
         self.layout.addWidget(self.value, 1, 1)
-        self.layout.addWidget(self.details, 2, 0)
+        self.layout.addWidget(self.details, 1, 2)
+        self.layout.addWidget(self.remarks, 2, 0)
         self.layout.addWidget(self.remarks, 2, 1)
+        self.layout.addWidget(self.remarks, 2, 2)
 
         self.setLayout(self.layout)
