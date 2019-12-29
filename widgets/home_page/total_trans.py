@@ -2,7 +2,7 @@
 """交易总计控件"""
 from PyQt5.QtCore import QDate, Qt
 from PyQt5.QtSql import QSqlQuery
-from PyQt5.QtWidgets import QLabel, QHBoxLayout, QVBoxLayout, QListWidget
+from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QListWidget, QListWidgetItem
 
 from utils import loggers
 from utils.constants import Constants
@@ -77,36 +77,17 @@ class TotalTrans(QListWidget):
         def __init__(self, summary, details, income, expend):
             super().__init__()
             self.layout = QHBoxLayout()
-            self.summary = QLabel(summary)
-            self.details = QLabel(details)
-            self.income = QLabel("{:.2f}".format(income))
-            self.expend = QLabel("{:.2f}".format(expend))
-            # self.model = QAbstractListModel()
-            # self.setModel(self.model)
+            self.summary = summary
+            self.details = details
+            self.income = "{:.2f}".format(income)
+            self.expend = "{:.2f}".format(expend)
 
             self.init_layout()
 
         def init_layout(self):
-            self.layout.addWidget(self.summary)
-            self.layout.addWidget(self.details)
-            self.layout.addSpacing(1)
-            self.layout.addWidget(QLabel("总收入："))
-            self.layout.addWidget(self.income)
-            self.layout.addWidget(QLabel("总支出："))
-            self.layout.addWidget(self.expend)
-
-            self.summary.setMaximumWidth(30)
-            self.details.setMinimumWidth(500)
-            self.income.setMinimumWidth(400)
-            self.expend.setMinimumWidth(120)
-
-            self.setLayout(self.layout)
-
-    # class _Model(QAbstractListModel):
-    #     def __init__(self):
-    #         super().__init__()
-    #
-    #     def data(self, index, role=None):
-    #         pass
-    #
-    #     def rowCount(self, parent=None, *args, **kwargs):
+            QListWidgetItem(self.summary, self)
+            QListWidgetItem(self.details, self)
+            QListWidgetItem("总收入", self)
+            QListWidgetItem(self.income, self)
+            QListWidgetItem("总支出", self)
+            QListWidgetItem(self.expend, self)
