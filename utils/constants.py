@@ -5,3 +5,8 @@ class Constants(object):
 
     # 表名称
     TRANSACTIONS_TABLE = "tb_transactions"
+    # trans_type
+    TRANS_TYPE = {
+        "income": 1,
+        "expand": -1
+    }

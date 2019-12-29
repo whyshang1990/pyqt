@@ -70,6 +70,7 @@ class HomeWidget(QWidget):
         self.init_ui()
         self.create_btn.clicked.connect(self.cw_widget.show)
         self.cw_widget.refresh_tb_signal.connect(self.rt_widget.model.refresh_model)
+        # self.cw_widget.refresh_tb_signal.connect(self.tt_widget.init_ui)
 
     @pyqtSlot()
     def init_ui(self):

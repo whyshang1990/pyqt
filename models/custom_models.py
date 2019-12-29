@@ -18,8 +18,7 @@ class MyTableModel(QStandardItemModel):
         self.init_model()
 
     def init_model(self):
-        h = self.headerData(0, Qt.Horizontal)
-        LOGGER.debug(h)
+        self.headerData(0, Qt.Horizontal)
         self.refresh_model()
 
     def data(self, index, role=None):
@@ -32,12 +31,17 @@ class MyTableModel(QStandardItemModel):
 
     @pyqtSlot()
     def refresh_model(self):
+        max_rows = 7
         """从QSqlQueryModel获取数据并重新格式化后放入表格"""
         query_model = QSqlQueryModel()
-        query_model.setQuery("select cost,trans_type,category,create_date from tb_transactions LIMIT 7")
+        query_model.setQuery("select cost,trans_type,category,create_date from tb_transactions "
+                             "order by create_date desc limit {}".format(max_rows))
         row_count, column_count = query_model.rowCount(), query_model.columnCount()
         if row_count == 0:
+            LOGGER.debug("未查询到数据")
             return
+
+        row_count = min(max_rows, row_count)
         LOGGER.debug("表格刷新")
         LOGGER.debug("row: %s, column: %s", row_count, column_count)
         for row in range(row_count):
