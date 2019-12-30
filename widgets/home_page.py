@@ -3,7 +3,7 @@
 from PyQt5.QtCore import QDate, Qt, pyqtSlot, pyqtSignal
 from PyQt5.QtSql import QSqlQuery, QSqlQueryModel
 from PyQt5.QtWidgets import QVBoxLayout, QListWidget, QLabel, QHBoxLayout, QListView, QGroupBox, QTableView, \
-    QMessageBox, QFormLayout, QLineEdit, QWidget, QComboBox, QRadioButton, QCalendarWidget, QPushButton
+    QMessageBox, QFormLayout, QLineEdit, QWidget, QComboBox, QRadioButton, QCalendarWidget, QPushButton, QButtonGroup
 
 from db import db_tools
 from models.custom_models import RecentTransTableModel
@@ -151,19 +151,23 @@ class CreateWidget(QWidget):
     """
     创建控件界面
     """
-    # 初始化信号
-    refresh_tb_signal = pyqtSignal()
+    # save按钮的刷新信号
+    save_signal = pyqtSignal()
 
     def __init__(self):
         super().__init__()
         # 页面文本输入框
         self.amount_edit = QLineEdit()
-        self.category_edit = QComboBox()
+        self.button_group = QButtonGroup(self)
         self.income_r_btn = QRadioButton("收入", self)
         self.expense_r_btn = QRadioButton("支出", self)
+        self.category_edit = QComboBox()
         self.date_edit = QCalendarWidget()
         self.remarks_edit = QLineEdit()
         self.save_btn = QPushButton("Save")
+
+        self.button_group.addButton(self.income_r_btn)
+        self.button_group.addButton(self.expense_r_btn)
         # 页面顶层布局
         self.layout = QVBoxLayout()
 
@@ -181,12 +185,13 @@ class CreateWidget(QWidget):
         # 创建子布局1
         form_layout = QFormLayout()
         form_layout.addRow("Amount", self.amount_edit)
-        form_layout.addRow("Category", self.category_edit)
         # 类型设置单选按钮
         r_btn_layout = QHBoxLayout()
         r_btn_layout.addWidget(self.income_r_btn)
         r_btn_layout.addWidget(self.expense_r_btn)
         form_layout.addRow("Type", r_btn_layout)
+
+        form_layout.addRow("Category", self.category_edit)
         form_layout.addRow("date", self.date_edit)
         form_layout.addRow("Remarks", self.remarks_edit)
 
@@ -229,7 +234,7 @@ class CreateWidget(QWidget):
                 "create_date": date
             }
             db_tools.insert_into("tb_transaction", params_dict)
-            self.refresh_tb_signal.emit()
+            self.save_signal.emit()
             self.close()
         except Exception as exp:
             LOGGER.debug(repr(exp))
@@ -252,6 +257,8 @@ class CreateWidget(QWidget):
             return -1
 
     def init_type(self):
+        trans_type = self.button_group.checkedButton()
+        LOGGER.debug("trans_type: %s", trans_type)
         """初始化分类下拉控件，控件显示内容由数据库获取"""
         query_model = QSqlQueryModel()
         query_model.setQuery("select name from tb_category where level=0 and trans_type=-1;")
