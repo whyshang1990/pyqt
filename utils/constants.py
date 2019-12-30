@@ -7,6 +7,6 @@ class Constants(object):
     TRANSACTIONS_TABLE = "tb_transactions"
     # trans_type
     TRANS_TYPE = {
-        "income": 1,
-        "expand": -1
+        "expand": 1,
+        "income": 2
     }

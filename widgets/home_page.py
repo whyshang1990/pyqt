@@ -166,20 +166,16 @@ class CreateWidget(QWidget):
         self.remarks_edit = QLineEdit()
         self.save_btn = QPushButton("Save")
 
-        self.button_group.addButton(self.income_r_btn)
-        self.button_group.addButton(self.expense_r_btn)
+        self.button_group.addButton(self.expense_r_btn, 1)
+        self.button_group.addButton(self.income_r_btn, 2)
         # 页面顶层布局
         self.layout = QVBoxLayout()
 
         # 开始初始化
-        self.init_type()
-        self.init_ui()
         self.set_ui_style()
+        self.init_ui()
+        self.init_type()
         self.signal_conn_slot()
-
-        self.setLayout(self.layout)
-        self.resize(400, 400)
-        self.setWindowTitle("创建交易")
 
     def init_ui(self):
         # 创建子布局1
@@ -211,6 +207,10 @@ class CreateWidget(QWidget):
         self.expense_r_btn.setChecked(True)
         self.remarks_edit.setPlaceholderText("添加备注信息")
         self.save_btn.setEnabled(False)
+
+        self.setLayout(self.layout)
+        self.resize(400, 400)
+        self.setWindowTitle("创建交易")
 
     def signal_conn_slot(self):
         """
@@ -257,11 +257,11 @@ class CreateWidget(QWidget):
             return -1
 
     def init_type(self):
-        trans_type = self.button_group.checkedButton()
-        LOGGER.debug("trans_type: %s", trans_type)
+        checked_id = self.button_group.checkedId()
+        LOGGER.debug("trans_type: %s", checked_id)
         """初始化分类下拉控件，控件显示内容由数据库获取"""
         query_model = QSqlQueryModel()
-        query_model.setQuery("select name from tb_category where level=0 and trans_type=-1;")
+        query_model.setQuery("select name from tb_category where level=0 and trans_type={};".format(checked_id))
         categories = [query_model.record(row).value("name") for row in range(query_model.rowCount())]
         LOGGER.debug("categories: %s", categories)
         # for category in categories:
