@@ -209,18 +209,18 @@ class CreateWidget(QWidget):
         self.save_btn.setEnabled(False)
 
         self.setLayout(self.layout)
-        self.resize(400, 400)
+        self.resize(300, 400)
         self.setWindowTitle("创建交易")
 
     def signal_conn_slot(self):
         """
         连接信号与槽
         """
-        # logger.debug("CreateWidget：连接信号与槽")
         # save按钮
         self.save_btn.clicked.connect(self.save)
         # save按钮是否激活
         self.amount_edit.textChanged.connect(self.check_save_disable)
+        self.button_group.buttonClicked.connect(self.init_type)
 
     @pyqtSlot()
     def save(self):
@@ -256,10 +256,12 @@ class CreateWidget(QWidget):
         else:
             return -1
 
+    @pyqtSlot()
     def init_type(self):
+        """初始化分类下拉控件，控件显示内容由数据库获取"""
+        self.category_edit.clear()
         checked_id = self.button_group.checkedId()
         LOGGER.debug("trans_type: %s", checked_id)
-        """初始化分类下拉控件，控件显示内容由数据库获取"""
         query_model = QSqlQueryModel()
         query_model.setQuery("select name from tb_category where level=0 and trans_type={};".format(checked_id))
         categories = [query_model.record(row).value("name") for row in range(query_model.rowCount())]
