@@ -33,7 +33,7 @@ class RecentTransTableModel(QStandardItemModel):
         max_rows = 7
         """从QSqlQueryModel获取数据并重新格式化后放入表格"""
         query_model = QSqlQueryModel()
-        query_model.setQuery("select cost,trans_type,category,create_date from tb_transactions "
+        query_model.setQuery("select cost,trans_type,category,create_date from tb_transaction "
                              "order by create_date desc limit {}".format(max_rows))
         row_count, column_count = query_model.rowCount(), query_model.columnCount()
         if row_count == 0:
@@ -51,6 +51,8 @@ class RecentTransTableModel(QStandardItemModel):
                         item = QStandardItem("收入")
                     else:
                         item = QStandardItem("支出")
+                elif column == 0:
+                    item = QStandardItem("{:.2f}".format(query_model.data(query_model.index(row, column))))
                 else:
                     item = QStandardItem(str(query_model.data(query_model.index(row, column))))
                 self.setItem(row, column, item)
