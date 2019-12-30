@@ -70,8 +70,8 @@ class HomeWidget(QWidget):
 
         self.init_ui()
         self.create_btn.clicked.connect(self.cw_widget.show)
-        self.cw_widget.refresh_tb_signal.connect(self.rt_widget.model.refresh_model)
-        # self.cw_widget.refresh_tb_signal.connect(self.tt_widget.init_ui)
+        # 绑定保存按钮信号到槽（刷新页面）
+        self.cw_widget.refresh_tb_signal.connect(self.update_data)
 
     @pyqtSlot()
     def init_ui(self):
@@ -86,6 +86,11 @@ class HomeWidget(QWidget):
 
         self.setLayout(self.layout)
 
+    @pyqtSlot()
+    def update_data(self):
+        """更新控件显示内容"""
+        self.rt_widget.model.refresh_model()
+        self.tt_widget.update_cost()
 
 class CreateWidget(QWidget):
     """
