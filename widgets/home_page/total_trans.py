@@ -2,7 +2,7 @@
 """交易总计控件"""
 from PyQt5.QtCore import QDate, Qt
 from PyQt5.QtSql import QSqlQuery
-from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QListWidget, QListWidgetItem
+from PyQt5.QtWidgets import QVBoxLayout, QListWidget, QLabel, QHBoxLayout
 
 from utils import loggers
 from utils.constants import Constants
@@ -77,17 +77,15 @@ class TotalTrans(QListWidget):
         def __init__(self, summary, details, income, expend):
             super().__init__()
             self.layout = QHBoxLayout()
-            self.summary = summary
-            self.details = details
-            self.income = "{:.2f}".format(income)
-            self.expend = "{:.2f}".format(expend)
+            self.summary_label = QLabel(summary + "(" + details + ")", self)
+            self.income_label = QLabel("总收入：{:.2f}".format(income), self)
+            self.expend_label = QLabel("总支出：{:.2f}".format(expend), self)
 
-            self.init_layout()
+            self.init_ui()
 
-        def init_layout(self):
-            QListWidgetItem(self.summary, self)
-            QListWidgetItem(self.details, self)
-            QListWidgetItem("总收入", self)
-            QListWidgetItem(self.income, self)
-            QListWidgetItem("总支出", self)
-            QListWidgetItem(self.expend, self)
+        def init_ui(self):
+            self.layout.addWidget(self.summary_label)
+            self.layout.addWidget(self.income_label)
+            self.layout.addWidget(self.expend_label)
+
+            self.setLayout(self.layout)
