@@ -15,6 +15,45 @@ LOGGER = loggers.get_logger("total_trans")
 DATE_FORMAT = "M月d日"
 
 
+class HomeWidget(QWidget):
+    """主页展示控件"""
+    def __init__(self):
+        LOGGER.debug("主窗口主页控件初始化")
+        super().__init__()
+        self.create_btn = QPushButton("创建交易")
+        self.cw_widget = CreateWidget()
+        self.rt_widget = RecentTrans("最近交易")
+        self.tt_widget_title = QLabel("交易总计")
+        self.tt_widget = TotalTrans()
+
+        self.create_layout = QHBoxLayout()
+        self.create_layout.addStretch(1)
+        self.create_layout.addWidget(self.create_btn)
+
+        self.top_layout = self.init_top_layout()
+
+        self.setLayout(self.top_layout)
+
+        self.create_btn.clicked.connect(self.cw_widget.show)
+        # 绑定保存按钮信号到槽（刷新页面）
+        self.cw_widget.save_signal.connect(self.update_data)
+
+    @pyqtSlot()
+    def init_top_layout(self):
+        top_layout = QVBoxLayout()
+        top_layout.addLayout(self.create_layout)
+        top_layout.addWidget(self.rt_widget)
+        top_layout.addWidget(self.tt_widget_title)
+        top_layout.addWidget(self.tt_widget)
+        return top_layout
+
+    @pyqtSlot()
+    def update_data(self):
+        """更新控件显示内容"""
+        self.rt_widget.model.refresh_model()
+        self.tt_widget.update_cost()
+
+
 class TotalTrans(QListView):
     """交易总计控件，显示今日，本周，本月，本年的总收入，总支出"""
     def __init__(self):
@@ -38,7 +77,6 @@ class TotalTrans(QListView):
         self.layout.addWidget(self.week_widget)
         self.layout.addWidget(self.month_widget)
         self.layout.addWidget(self.year_widget)
-
         self.setLayout(self.layout)
 
     @pyqtSlot()
@@ -55,17 +93,16 @@ class TotalTrans(QListView):
         """总计页面子控件，包括3个Label控件用于显示总收入总支出"""
         def __init__(self, summary, details, income, expend):
             super().__init__()
-            self.layout = QHBoxLayout()
             income = income if income else 0
             expend = expend if expend else 0
             self.summary_label = QLabel(summary + "(" + details + ")", self)
             self.income_label = QLabel("总收入：{:.2f}".format(income), self)
             self.expend_label = QLabel("总支出：{:.2f}".format(expend), self)
 
+            self.layout = QHBoxLayout()
             self.layout.addWidget(self.summary_label)
             self.layout.addWidget(self.income_label)
             self.layout.addWidget(self.expend_label)
-
             self.setLayout(self.layout)
 
         def update_cost(self, income, expend):
@@ -128,12 +165,15 @@ class RecentTrans(QGroupBox):
     """
     def __init__(self, name):
         super().__init__(name)
-        self.layout = QHBoxLayout()
         self.table_view = QTableView()
         self.model = RecentTransTableModel(parent=self)
 
+        self.layout = QHBoxLayout()
+        self.layout.addWidget(self.table_view)
+        self.setLayout(self.layout)
+
         self.init_ui()
-        self.setMaximumHeight(277)
+
 
     def init_ui(self):
         self.model.setHeaderData(0, Qt.Horizontal, '金额')
@@ -143,8 +183,8 @@ class RecentTrans(QGroupBox):
 
         self.table_view.verticalHeader().hide()
         self.table_view.setModel(self.model)
-        self.layout.addWidget(self.table_view)
-        self.setLayout(self.layout)
+
+        self.setMaximumHeight(277)
 
 
 class CreateWidget(QWidget):
@@ -156,9 +196,8 @@ class CreateWidget(QWidget):
 
     def __init__(self):
         super().__init__()
-        # 页面文本输入框
+        # 初始化所有子控件
         self.amount_edit = QLineEdit()
-        self.button_group = QButtonGroup(self)
         self.income_r_btn = QRadioButton("收入", self)
         self.expense_r_btn = QRadioButton("支出", self)
         self.category_edit = QComboBox()
@@ -166,18 +205,20 @@ class CreateWidget(QWidget):
         self.remarks_edit = QLineEdit()
         self.save_btn = QPushButton("Save")
 
+        # 初始化样式
+        self.set_ui_style()
+
+        # 初始化收入/支出组合按钮
+        self.button_group = QButtonGroup(self)
         self.button_group.addButton(self.expense_r_btn, 1)
         self.button_group.addButton(self.income_r_btn, 2)
-        # 页面顶层布局
-        self.layout = QVBoxLayout()
-
-        # 开始初始化
-        self.set_ui_style()
-        self.init_ui()
         self.init_type()
+
+        self.setLayout(self.init_top_layout())
         self.signal_conn_slot()
 
-    def init_ui(self):
+    def init_top_layout(self):
+        top_layout = QVBoxLayout()
         # 创建子布局1
         form_layout = QFormLayout()
         form_layout.addRow("Amount", self.amount_edit)
@@ -196,8 +237,9 @@ class CreateWidget(QWidget):
         btn_layout.addStretch(1)
         btn_layout.addWidget(self.save_btn)
 
-        self.layout.addLayout(form_layout)
-        self.layout.addLayout(btn_layout)
+        top_layout.addLayout(form_layout)
+        top_layout.addLayout(btn_layout)
+        return top_layout
 
     def set_ui_style(self):
         """
@@ -208,7 +250,6 @@ class CreateWidget(QWidget):
         self.remarks_edit.setPlaceholderText("添加备注信息")
         self.save_btn.setEnabled(False)
 
-        self.setLayout(self.layout)
         self.resize(300, 400)
         self.setWindowTitle("创建交易")
 
@@ -252,9 +293,9 @@ class CreateWidget(QWidget):
     def check_radio_btn(self):
         """设定单选按钮返回值"""
         if self.income_r_btn.isChecked():
-            return 1
+            return 2
         else:
-            return -1
+            return 1
 
     @pyqtSlot()
     def init_type(self):
