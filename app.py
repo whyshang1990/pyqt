@@ -2,7 +2,7 @@
 import os
 import sys
 
-from PyQt5.QtWidgets import QApplication
+from PySide2.QtWidgets import QApplication
 
 from db import db_tools
 from main_window import MainWindow

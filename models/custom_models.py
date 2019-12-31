@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
-from PyQt5.QtCore import Qt, pyqtSlot
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
-from PyQt5.QtSql import QSqlQueryModel
+from PySide2.QtCore import Qt, Slot
+from PySide2.QtGui import QStandardItemModel, QStandardItem
+from PySide2.QtSql import QSqlQueryModel
 
 from utils import loggers
 
@@ -28,7 +28,7 @@ class RecentTransTableModel(QStandardItemModel):
 
         return QStandardItemModel.data(self, index, role)
 
-    @pyqtSlot()
+    @Slot()
     def refresh_model(self):
         max_rows = 7
         """从QSqlQueryModel获取数据并重新格式化后放入表格"""

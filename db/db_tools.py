@@ -3,7 +3,7 @@
 import os
 
 import yaml
-from PyQt5.QtSql import QSqlDatabase, QSqlQuery
+from PySide2.QtSql import QSqlDatabase, QSqlQuery
 
 from utils import loggers
 from utils.constants import Constants

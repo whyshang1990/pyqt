@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """交易总计控件"""
-from PyQt5.QtCore import QDate, Qt, pyqtSlot, pyqtSignal
-from PyQt5.QtSql import QSqlQuery, QSqlQueryModel
-from PyQt5.QtWidgets import QVBoxLayout, QListWidget, QLabel, QHBoxLayout, QListView, QGroupBox, QTableView, \
+from PySide2.QtCore import QDate, Qt, Slot, Signal
+from PySide2.QtSql import QSqlQuery, QSqlQueryModel
+from PySide2.QtWidgets import QVBoxLayout, QListWidget, QLabel, QHBoxLayout, QListView, QGroupBox, QTableView, \
     QMessageBox, QFormLayout, QLineEdit, QWidget, QComboBox, QRadioButton, QCalendarWidget, QPushButton, QButtonGroup
 
 from db import db_tools
@@ -38,7 +38,7 @@ class HomeWidget(QWidget):
         # 绑定保存按钮信号到槽（刷新页面）
         self.cw_widget.save_signal.connect(self.update_data)
 
-    @pyqtSlot()
+    @Slot()
     def init_top_layout(self):
         top_layout = QVBoxLayout()
         top_layout.addLayout(self.create_layout)
@@ -47,7 +47,7 @@ class HomeWidget(QWidget):
         top_layout.addWidget(self.tt_widget)
         return top_layout
 
-    @pyqtSlot()
+    @Slot()
     def update_data(self):
         """更新控件显示内容"""
         self.rt_widget.model.refresh_model()
@@ -79,7 +79,7 @@ class TotalTrans(QListView):
         self.layout.addWidget(self.year_widget)
         self.setLayout(self.layout)
 
-    @pyqtSlot()
+    @Slot()
     def update_cost(self):
         """刷新页面cost数据"""
         LOGGER.debug("总计页面费用刷新")
@@ -192,7 +192,7 @@ class CreateWidget(QWidget):
     创建控件界面
     """
     # save按钮的刷新信号
-    save_signal = pyqtSignal()
+    save_signal = Signal()
 
     def __init__(self):
         super().__init__()
@@ -263,7 +263,7 @@ class CreateWidget(QWidget):
         self.amount_edit.textChanged.connect(self.check_save_disable)
         self.button_group.buttonClicked.connect(self.init_type)
 
-    @pyqtSlot()
+    @Slot()
     def save(self):
         """save按钮槽函数"""
         try:
@@ -282,7 +282,7 @@ class CreateWidget(QWidget):
             tips = QMessageBox()
             tips.warning(self, '输入错误', '请检查后台日志', QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
 
-    @pyqtSlot()
+    @Slot()
     def check_save_disable(self):
         """save按钮是否激活槽函数"""
         if self.amount_edit.text():
@@ -297,7 +297,7 @@ class CreateWidget(QWidget):
         else:
             return 1
 
-    @pyqtSlot()
+    @Slot()
     def init_type(self):
         """初始化分类下拉控件，控件显示内容由数据库获取"""
         self.category_edit.clear()

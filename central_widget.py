@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 """中心窗口模块"""
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton
+from PySide2.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton
 
 from utils import loggers
 from widgets.home_page import HomeWidget

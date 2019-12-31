@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 """主窗口类"""
-from PyQt5.QtWidgets import QMainWindow, QDesktopWidget
+from PySide2.QtWidgets import QMainWindow, QDesktopWidget
 
 from central_widget import CentralWidget
 from utils import loggers
